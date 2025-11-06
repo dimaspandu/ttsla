@@ -1,10 +1,10 @@
 {
   "name": "ttsla",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"pnpm --filter ttsla-backend dev\" \"pnpm --filter ttsla-frontend dev\"",
+    "dev": "concurrently \"pnpm --filter ttsla-server dev\" \"pnpm --filter ttsla-client dev\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "type": "module",

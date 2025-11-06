@@ -1,0 +1,208 @@
+.crossword {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 1rem 0;
+
+  /* =====================
+     GRID SECTION
+  ===================== */
+  &__grid {
+    display: grid;
+    gap: 3px;
+    background-color: #d9e0e5;
+    border: 4px solid #d9e0e5;
+    max-width: fit-content;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  &__cell {
+    aspect-ratio: 1 / 1;
+    width: 64px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.1s ease;
+
+    &:hover {
+      background-color: #f0f0f0;
+      transform: scale(1.05);
+    }
+
+    &--alt {
+      background-color: #fafafa;
+    }
+
+    &--disabled {
+      background-color: #444;
+      cursor: not-allowed;
+      pointer-events: none;
+      border: none;
+    }
+
+    &--correct {
+      background-color: #10b981; // green
+      color: #fff;
+      border-color: #10b981;
+
+      &:hover {
+        color: #10b981;
+      }
+    }
+
+    &--present {
+      background-color: #facc15; // yellow
+      color: #fff;
+      border-color: #facc15;
+
+      &:hover {
+        color: #facc15;
+      }
+    }
+
+    &--wrong {
+      background-color: #dc2626; // red
+      color: #fff;
+      border-color: #dc2626;
+
+      &:hover {
+        color: #dc2626;
+      }
+    }
+  }
+
+  /* =====================
+     MODAL SECTION
+  ===================== */
+  &__modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+
+  &__close-icon {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    &:hover {
+      transform: rotate(90deg) scale(1.1);
+    }
+  }
+
+  /* =====================
+     KEYBOARD SECTION
+  ===================== */
+  &__keyboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(36px, 1fr));
+    gap: 6px;
+    margin-top: 1rem;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  &__key {
+    padding: 0.6rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    background-color: #e5e7eb;
+    color: #111;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #d1d5db;
+      transform: translateY(-2px);
+    }
+
+    /* Keyboard feedback states */
+    &--correct {
+      background-color: #10b981;
+      color: #fff;
+    }
+
+    &--present {
+      background-color: #facc15;
+      color: #fff;
+    }
+
+    &--wrong {
+      background-color: #9ca3af;
+      color: #fff;
+    }
+  }
+
+  /* =====================
+     RESPONSIVE
+  ===================== */
+  @media (max-width: 768px) {
+    &__grid {
+      width: 100%;
+      max-width: 100%;
+      gap: 4px;
+      border-width: 3px;
+      border-radius: 10px;
+      justify-content: center;
+    }
+
+    &__cell {
+      width: 100%;
+      font-size: 4.5vw;
+      border-radius: 6px;
+    }
+
+    &__keyboard {
+      grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+      max-width: 100%;
+    }
+
+    &__key {
+      font-size: 4vw;
+      padding: 0.8rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    &__cell {
+      font-size: 5vw;
+    }
+
+    &__key {
+      font-size: 5vw;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+  }
+}

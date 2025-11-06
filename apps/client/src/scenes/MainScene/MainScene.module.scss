@@ -1,0 +1,218 @@
+.main-scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.25rem;
+  min-height: 100vh;
+  background-color: #f9fafb;
+
+  /* ===== Title ===== */
+  &__title {
+    font-size: 2.25rem; /* slightly bigger */
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+    text-align: center;
+    max-width: 600px; /* prevent overly wide title */
+    width: 100%;
+  }
+
+  /* ===== Subtitle ===== */
+  &__subtitle {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #4b5563; /* slightly darker for contrast */
+    margin-bottom: 1.5rem;
+    text-align: center;
+    max-width: 600px; /* limit width for readability */
+    width: 100%;
+    line-height: 1.4;
+  }
+
+  /* ===== Custom Alert for dev answers ===== */
+  &__alert-custom {
+    background-color: #fefce8; /* light yellow for standout */
+    border: 2px solid #facc15; /* yellow border */
+    border-radius: 0.75rem;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+    .alert__title {
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: #78350f;
+      margin-bottom: 0.5rem;
+    }
+
+    .alert__list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+
+      .alert__item {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.95rem;
+        color: #78350f;
+        margin-bottom: 0.25rem;
+
+        .alert__word {
+          font-weight: 600;
+        }
+
+        .alert__meta {
+          font-style: italic;
+          color: #92400e;
+        }
+      }
+    }
+
+    @media (max-width: 640px) {
+      width: calc(100% - 2rem);
+      max-width: 100%;
+      padding: 1rem;
+    }
+  }
+
+  &__grid {
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  &__loading,
+  &__error {
+    font-size: 1rem;
+    color: #374151;
+    margin-top: 1rem;
+  }
+
+  &__button {
+    position: fixed;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    margin-top: 2rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #2563eb;
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+
+    &:hover {
+      background-color: #1d4ed8;
+    }
+
+    &--disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    padding-bottom: 6rem;
+
+    &__title,
+    &__subtitle {
+      max-width: 100%;
+      padding: 0 1rem;
+    }
+
+    &__button {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 2rem);
+      max-width: 420px;
+      margin-top: 0;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  /* Daily lockout message */
+  &__locked {
+    margin-top: 2rem;
+    padding: 2rem;
+    background-color: #f3f4f6;
+    border: 2px dashed #9ca3af;
+    border-radius: 1rem;
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+
+    h2 {
+      font-size: 1.25rem;
+      color: #111827;
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+      font-weight: 700;
+    }
+
+    p {
+      font-size: 1rem;
+      color: #6b7280;
+    }
+
+    @media (max-width: 640px) {
+      padding: 1.5rem;
+      h2 {
+        font-size: 1.1rem;
+      }
+      p {
+        font-size: 0.95rem;
+      }
+    }
+  }
+
+  &__answers {
+    margin-top: 1.5rem;
+    text-align: left;
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 0.75rem;
+      text-align: center;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        font-size: 0.95rem;
+        color: #374151;
+        margin-bottom: 0.4rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        strong {
+          color: #111827;
+        }
+
+        .main-scene__answer-meta {
+          font-style: italic;
+          color: #6b7280;
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,315 @@
+.crossword-modal {
+  position: relative;
+  background: #fff;
+  padding: 2.5rem 2rem;
+  border-radius: 1rem;
+  width: 95%;
+  max-width: 600px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  overflow-y: auto;
+  max-height: 90vh;
+
+  /* ===== Overlay ===== */
+  &__overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+    padding: 1rem;
+  }
+
+  /* ===== Close Icon ===== */
+  &__close-icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    display: none; // flex
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, transform 0.2s ease;
+
+    svg {
+      width: 28px;
+      height: 28px;
+      stroke: #6b7280;
+      transition: stroke 0.2s ease;
+    }
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+      transform: scale(1.05);
+
+      svg {
+        stroke: #111827;
+      }
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  /* ===== Title ===== */
+  &__title {
+    font-family: "Comic Neue", sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #111827;
+  }
+
+  /* ===== Grid ===== */
+  &__grid {
+    display: grid;
+    justify-content: center;
+    gap: 0.3rem;
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 1.5rem;
+  }
+
+  &__row {
+    display: flex;
+    justify-content: center;
+    gap: 0.3rem;
+  }
+
+  &__cell {
+    width: 48px;
+    height: 48px;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    transition: background 0.2s, border-color 0.2s;
+
+    &--correct {
+      background: #10b981;
+      color: #fff;
+      border-color: #10b981;
+    }
+
+    &--present {
+      background: #facc15;
+      color: #fff;
+      border-color: #facc15;
+    }
+
+    &--absent {
+      background: #9ca3af;
+      color: #fff;
+      border-color: #9ca3af;
+    }
+  }
+
+  /* ===== Keyboard ===== */
+  &__keyboard {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+  }
+
+  &__key {
+    background: #e5e7eb;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 38px;
+    transition: background 0.2s;
+
+    &:hover {
+      background: #d1d5db;
+    }
+
+    &--action {
+      background: #9ca3af;
+      color: #fff;
+    }
+
+    /* ===== Keyboard Dynamic States ===== */
+    &--correct {
+      background: #10b981 !important;
+      color: #fff !important;
+    }
+
+    &--present {
+      background: #facc15 !important;
+      color: #fff !important;
+    }
+
+    &--absent {
+      background: #9ca3af !important;
+      color: #fff !important;
+    }
+  }
+
+  &__spacer {
+    width: 100%;
+    height: 0.5rem;
+  }
+
+  /* ===== Result Section ===== */
+  &__result {
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  &__success {
+    color: #16a34a;
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  &__fail {
+    color: #dc2626;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  &__close-button {
+    margin-top: 0.75rem;
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: #2563eb;
+    }
+  }
+
+  /* ===== Responsive (Mobile) ===== */
+  @media (max-width: 768px) {
+    &__overlay {
+      align-items: flex-start;
+      padding: 0;
+    }
+
+    & {
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      max-height: none;
+      border-radius: 0;
+      padding: 1.5rem 1rem;
+      overflow-y: auto;
+    }
+
+    &__title {
+      font-size: 1.4rem;
+      text-align: left;
+    }
+
+    /* ===== Responsive Grid ===== */
+    &__grid {
+      gap: 0.25rem;
+      margin-top: 1rem;
+    }
+
+    &__cell {
+      width: calc((100vw - 2rem) / 5.25);
+      height: calc((100vw - 2rem) / 5.25);
+      font-size: 5vw;
+      border-radius: 6px;
+    }
+
+    /* ===== Responsive Keyboard ===== */
+    &__keyboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(32px, 1fr));
+      gap: 0;
+      margin-top: 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    &__key {
+      border-radius: 0;
+      padding: 1rem 0;
+      font-size: 1rem;
+      border-right: 1px solid #d1d5db;
+      border-bottom: 1px solid #d1d5db;
+
+      &:nth-child(10n) {
+        border-right: none;
+      }
+
+      &:active {
+        background: #d1d5db;
+      }
+    }
+
+    &__close-icon {
+      top: 0.5rem;
+      right: 0;
+      padding: 0.75rem;
+
+      svg {
+        width: 38px;
+        height: 38px;
+        stroke: #374151;
+      }
+    }
+
+    /* ===== Fixed Result Bar (Mobile) ===== */
+    &__result {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      padding: 1rem 1.25rem 1.25rem;
+      border-top: 2px solid #e5e7eb;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    &__success,
+    &__fail {
+      font-size: 1.25rem;
+      text-align: center;
+      margin-bottom: 0.75rem;
+    }
+
+    &__close-button {
+      width: 90%;
+      max-width: 380px;
+      border-radius: 50px;
+      padding: 0.9rem 1rem;
+      font-size: 1.05rem;
+    }
+  }
+}
