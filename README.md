@@ -1,125 +1,160 @@
 # TTSLA — Crossword Puzzle Inspired by Katla
 
-**TTSLA (Teka Teki Silang berbasis Katla)** is an interactive web-based crossword puzzle game inspired by the Indonesian version of Wordle (Katla).
-Players solve interconnected crossword grids using Katla-style mechanics, where letter hints appear based on their accuracy.
-
-The game features daily puzzles where players must guess words in a crossword format. When a word is solved through Katla (the guessing mini-game), intersecting words that are now fully filled with correct letters are automatically solved as well.
+**TTSLA (Teka Teki Silang berbasis Katla)** is an interactive word puzzle inspired by the Indonesian Wordle, Katla — but with a crossword twist.
+Players guess interconnected words in a crossword grid using Katla-style mechanics, where letters reveal accuracy hints in color.
 
 ## Features
 
-- Interactive crossword grid with Katla-style feedback colors
-- Real-time validation of words against KBBI (Indonesian dictionary)
-- Crosswords are linked between clues (across & down) with auto-solving for intersecting words
-- Daily puzzles with interconnected word relationships
-- Smooth keyboard interaction and animations
-- Modular monorepo structure (frontend + backend)
-- Built for scalability and easy local development
+- Katla-style letter feedback
+- Interconnected crossword logic with auto-solve for intersecting words
+- Responsive grid layout with smooth interactions
+- Daily lock system (one puzzle per day)
+- Minimalist, modular, and fast — built for experimentation
+- Uses RPC-like “shared procedure imports” between client and server for ultra-fast iteration
 
 ## Project Structure
 
 ```
 ttsla/
-├── apps/
-│   ├── backend/     # Express + Socket.IO backend
-│   └── frontend/    # React + Vite + TypeScript frontend
-├── package.json     # Root config (pnpm workspace + concurrently)
+├── server/                  # Lightweight TypeScript server (no framework)
+│   ├── src/
+│   │   ├── procedures/      # Shared callable functions (RPC-style)
+│   │   │   └── getRandomCrossword.ts
+│   │   └── main.ts          # Manual test entry
+│   └── tsconfig.json
+│
+├── client/                  # React + Vite frontend
+│   ├── src/
+│   │   ├── scenes/MainScene.tsx
+│   │   ├── components/
+│   │   └── contracts/
+│   └── tsconfig.json
+│
+├── package.json
 ├── pnpm-workspace.yaml
-├── tsconfig.json
-└── LICENSE
+└── README.md
 ```
 
 ## Tech Stack
 
 ### Frontend
-- React 19
-- Vite 7
-- TypeScript
-- Sass (SCSS)
-- Zustand — state management
+- React 19 + Vite 7 + TypeScript
+- SCSS (BEM-based)
+- Zustand for state management
 - React Router DOM 7
-- React GA4 — Google Analytics integration
-- Vitest + Testing Library — testing utilities
+- Responsive layout for mobile and desktop
+- Vitest for testing
 
 ### Backend
-- Node.js + Express 5
-- Socket.IO 4 — real-time communication
-- TypeScript
-- ts-node-dev — hot reload for backend development
+- Node.js + TypeScript (no heavy framework)
+- Dynamic ES Module loading (import())
+- Shared procedure concept (acts like local RPC)
 
-### Tooling
-- pnpm — monorepo package manager
-- concurrently — run frontend and backend together
+## RPC-like Procedure System
 
-## Installation
+Instead of using REST or GraphQL APIs, this project employs RPC-like dynamic imports during development.
 
-Clone the repository and install dependencies using pnpm:
+Example:
+```ts
+const remoteProcedureUrl = "http://localhost:5174/src/procedures/getRandomCrossword.ts";
+const { getRandomCrossword } = await import(/* @vite-ignore */ remoteProcedureUrl);
+const puzzle = await getRandomCrossword();
+```
 
+### Concept
+- The client imports and executes TypeScript functions directly from the server.
+- Works like a local Remote Procedure Call (RPC).
+- Avoids creating API endpoints for each function.
+- Suitable for rapid prototyping and local development.
+
+## Getting Started
+
+### Install Dependencies
 ```bash
-git clone https://github.com/your-username/ttsla.git
-cd ttsla
 pnpm install
 ```
 
-## Running the Project
+### Start the Development Servers
 
-To start both frontend and backend concurrently:
+Run both server and client separately:
 
 ```bash
+# Terminal 1 — Run server
+cd server
 pnpm run dev
+# → http://localhost:5174/
+
+# Terminal 2 — Run client
+cd client
+pnpm run dev
+# → http://localhost:4173/
 ```
 
-This will launch:
-- Frontend → http://localhost:5173
-- Backend → http://localhost:4000
+The client dynamically imports logic from the server at runtime.
 
-Example output:
+## Development Workflow
 
+### Edit or Add a New Procedure
+Place logic under:
 ```
-VITE v7.0.4  ready in 2s
-→ Local: http://localhost:5173/
-Backend running on http://localhost:4000
+server/src/procedures/
 ```
+
+Example:
+```ts
+export function getRandomCrossword() {
+  return {
+    id: 443,
+    rows: 6,
+    cols: 5,
+    grid: [...],
+    answers: [...]
+  };
+}
+```
+
+### Consume It from the Client
+In the React side (e.g. MainScene.tsx):
+```ts
+const { getRandomCrossword } = await import(
+  /* @vite-ignore */ "http://localhost:5174/src/procedures/getRandomCrossword.ts"
+);
+const data = await getRandomCrossword();
+setPuzzle(data);
+```
+
+This behaves just like calling a backend API, but directly reuses the same code file.
 
 ## How to Play
 
-1. **Select a Slot**: Click on numbered cells in the crossword grid to select a word slot
-2. **Play Katla**: Guess the word using Katla mechanics - you have 6 attempts
-3. **Color Feedback**:
-   - 🟩 Green: Correct letter in correct position
-   - 🟨 Yellow: Correct letter in wrong position
-   - ⬛ Gray: Letter not in the word
-4. **Auto-Solving**: When you solve a word, intersecting words that are now fully filled with correct letters are automatically solved
-5. **Complete the Puzzle**: Continue solving slots until all words are filled
+1. Click on a word slot in the crossword grid.
+2. Guess the word using the Katla-style mini-game (6 tries max).
+3. Color feedback:
+   - Green: Correct letter and position
+   - Yellow: Correct letter, wrong position
+   - Gray: Letter not in the word
+4. Solving one word can auto-solve intersecting ones.
+5. Once completed, your progress is locked for the day.
 
-## Development Notes
-
-- Frontend and backend can also be run separately:
-
-```bash
-# In one terminal
-pnpm --filter ttsla-backend dev
-
-# In another terminal
-pnpm --filter ttsla-frontend dev
-```
-
-- Global styles are defined in `frontend/src/globals.scss` using the Inter font.
-- Backend entry point: `apps/backend/src/index.ts`
-
-## Scripts Overview
+## Scripts
 
 | Command | Description |
 |----------|--------------|
-| `pnpm run dev` | Run frontend & backend concurrently |
-| `pnpm --filter ttsla-frontend dev` | Run frontend only |
-| `pnpm --filter ttsla-backend dev` | Run backend only |
-| `pnpm --filter ttsla-frontend build` | Build frontend for production |
-| `pnpm --filter ttsla-frontend preview` | Preview built frontend |
+| `pnpm run dev` | Start the dev server (client or server, depending on folder) |
+| `pnpm run build` | Build the TypeScript code |
+| `pnpm run preview` | Preview the built frontend |
+| `pnpm run test` | Run unit tests |
 
-## License
+## Notes
 
-This project is licensed under the ISC License.
+- The dynamic import (`@vite-ignore`) is only for development.
+- In production, these procedures should be replaced by real API endpoints.
+- Ensure both localhost:4173 (client) and localhost:5174 (server) are running.
 
 ## Author
 
-Developed by Nam Do San.
+Developed by Nam Do San — restructured for modern TypeScript prototyping.
+
+## License
+
+Licensed under the ISC License.
