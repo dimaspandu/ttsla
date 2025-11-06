@@ -4,7 +4,9 @@ import type { CrosswordGridProps } from "../../contracts/props";
 import CrosswordModal from "../CrosswordModal";
 import crosswordModalRPC from "~/rpc/CrosswordModalRPC";
 import evaluateGuessFromServer from "~/rpc/evaluateGuessFromServer";
+import evaluateGuess from "~/rpc/evaluateGuess";
 import mergeKeyStatusesFromServer from "~/rpc/mergeKeyStatusesFromServer";
+import mergeKeyStatuses from "~/rpc/mergeKeyStatuses";
 import styles from "./CrosswordGrid.module.scss";
 
 const MAX_ATTEMPTS_PER_WORD = 6; // Matches modal
@@ -65,8 +67,35 @@ const CrosswordGrid: React.FC<CrosswordGridProps> = ({ data, onComplete }) => {
     // Only block if word is solved or attempts exhausted
     if (isWordSolved(found) || remainingAttemptsMap[key] === 0) return;
 
-    crosswordModalRPC.syncEvaluateGuess(await evaluateGuessFromServer() as never);
-    crosswordModalRPC.syncMergeKeyStatuses(await mergeKeyStatusesFromServer() as never);
+    // ---------------------------------------------------------
+    // Sync server-side evaluation and merge logic.
+    // If remote imports fail, fall back to local implementations.
+    // ---------------------------------------------------------
+    try {
+      const [evaluateFn, mergeFn] = await Promise.all([
+        evaluateGuessFromServer(),
+        mergeKeyStatusesFromServer(),
+      ]);
+
+      if (typeof evaluateFn === "function") {
+        crosswordModalRPC.syncEvaluateGuess(evaluateFn);
+      } else {
+        console.warn("[Crossword] evaluateGuessFromServer did not return a function, using local fallback.");
+        crosswordModalRPC.syncEvaluateGuess(evaluateGuess);
+      }
+
+      if (typeof mergeFn === "function") {
+        crosswordModalRPC.syncMergeKeyStatuses(mergeFn);
+      } else {
+        console.warn("[Crossword] mergeKeyStatusesFromServer did not return a function, using local fallback.");
+        crosswordModalRPC.syncMergeKeyStatuses(mergeKeyStatuses);
+      }
+
+    } catch (error) {
+      console.error("[Crossword] Failed to sync remote RPC functions. Using local fallback.", error);
+      crosswordModalRPC.syncEvaluateGuess(evaluateGuess);
+      crosswordModalRPC.syncMergeKeyStatuses(mergeKeyStatuses);
+    }
 
     setSelectedWord(found);
   };

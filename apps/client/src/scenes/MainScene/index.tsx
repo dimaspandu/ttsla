@@ -85,22 +85,35 @@ export default function MainScene() {
         </h2>
         <p>Kamu sudah bermain hari ini. Kembali besok untuk teka-teki baru!</p>
 
-        {puzzle && puzzle.answers && puzzle.answers.length > 0 && (
+        {puzzle?.answers?.length ? (
           <div className={styles["main-scene__answers"]}>
             <h3>Jawaban yang benar:</h3>
             <ul>
-              {puzzle.answers.map((ans, index) => (
-                <li key={index}>
-                  <strong>{ans.word}</strong>{" "}
-                  <span className={styles["main-scene__answer-meta"]}>
-                    ({ans.direction}, baris {ans.start[0] + 1}, kolom{" "}
-                    {ans.start[1] + 1})
-                  </span>
-                </li>
-              ))}
+              {puzzle.answers.map((ans, index) => {
+                const word = ans.word.toLowerCase();
+                const kbbiUrl = `https://kbbi.web.id/${encodeURIComponent(word)}`;
+
+                return (
+                  <li key={index}>
+                    <a
+                      href={kbbiUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles["main-scene__answer-link"]}
+                      title={`Lihat arti kata "${word}" di KBBI`}
+                    >
+                      <strong>{ans.word}</strong>
+                    </a>
+                    <span className={styles["main-scene__answer-meta"]}>
+                      ({ans.direction}, baris {ans.start[0] + 1}, kolom{" "}
+                      {ans.start[1] + 1})
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           </div>
-        )}
+        ) : null}
       </div>
     );
   };

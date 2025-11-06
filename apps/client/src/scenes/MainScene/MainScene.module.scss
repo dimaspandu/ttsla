@@ -212,6 +212,19 @@
           color: #6b7280;
           font-size: 0.9rem;
         }
+
+        .main-scene__answer-link {
+          text-decoration: none;
+          color: #2563eb;
+          font-weight: 600;
+          transition: color 0.2s ease;
+
+          &:hover,
+          &:focus {
+            color: #1d4ed8;
+            text-decoration: underline;
+          }
+        }
       }
     }
   }

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import type { CrosswordModalProps } from "~/contracts/props";
 import type { LetterStatus } from "~/contracts/types";
-import styles from "./CrosswordModal.module.scss";
 import crosswordModalRPC from "~/rpc/CrosswordModalRPC";
+import styles from "./CrosswordModal.module.scss";
 
 const MAX_ATTEMPTS = 6;
 
