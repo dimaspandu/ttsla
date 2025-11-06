@@ -3,33 +3,8 @@ import type { CrosswordData } from "~/contracts/types";
 // import Alert from "~/components/Alert";
 import CrosswordGrid from "~/components/CrosswordGrid";
 import HowToPlayModal from "~/components/HowToPlayModal";
+import getRandomCrosswordFromServer from "~/rpc/getRandomCrosswordFromServer";
 import styles from "./MainScene.module.scss";
-
-// -----------------------------------------
-// Lazy load crossword puzzle data generator
-// -----------------------------------------
-//
-// This method dynamically imports a module from the server at runtime.
-// The pattern is conceptually similar to RPC (Remote Procedure Call):
-// - The client does not directly know the data logic implementation.
-// - Instead, it calls a remote "procedure" (a server-side function).
-// - The function is dynamically fetched and executed as if it were local.
-// 
-// This approach is flexible for prototyping since we avoid a traditional
-// HTTP API layer and directly reuse the same TypeScript logic on both
-// the client and server during development.
-//
-const fetchRandomCrossword = async () => {
-  const remoteProcedureUrl =
-    "http://localhost:5174/src/procedures/getRandomCrossword.ts";
-
-  // The `@vite-ignore` comment prevents Vite from transforming the import path.
-  // It tells the bundler to keep this dynamic import as-is so it can resolve at runtime.
-  const { getRandomCrossword } = await import(/* @vite-ignore */ remoteProcedureUrl);
-
-  // Execute the imported remote procedure.
-  return getRandomCrossword();
-};
 
 export default function MainScene() {
   // -----------------------------------------
@@ -53,7 +28,7 @@ export default function MainScene() {
   const loadPuzzle = async () => {
     setLoading(true);
     try {
-      const data = await fetchRandomCrossword();
+      const data = await getRandomCrosswordFromServer();
       setPuzzle(data);
     } catch (err) {
       console.error("Failed to load crossword:", err);

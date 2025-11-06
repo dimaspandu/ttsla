@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import type { CrosswordModalProps } from "~/contracts/props";
 import styles from "./CrosswordModal.module.scss";
 
+type LetterStatus = "correct" | "present" | "absent";
+
 const MAX_ATTEMPTS = 6;
 
 const CrosswordModal: React.FC<CrosswordModalProps> = ({
@@ -12,10 +14,84 @@ const CrosswordModal: React.FC<CrosswordModalProps> = ({
 }) => {
   const [guesses, setGuesses] = useState<string[]>([]);
   const [currentGuess, setCurrentGuess] = useState("");
-  const [keyStatuses, setKeyStatuses] = useState<Record<string, string>>({});
+  const [keyStatuses, setKeyStatuses] = useState<
+    Record<string, LetterStatus | undefined>
+  >({});
 
   const correctWord = word.word.toUpperCase();
 
+  // --------------------------------------------------
+  // Determine statuses for a guess vs the correct word.
+  // Wordle-style rule for duplicates:
+  // 1) First pass -> mark exact matches (correct).
+  // 2) Second pass -> mark present only if remaining count > 0.
+  // --------------------------------------------------
+  const getStatuses = (guess: string, answer: string): LetterStatus[] => {
+    const length = Math.max(guess.length, answer.length);
+    const result: LetterStatus[] = Array(length).fill("absent");
+
+    // Count letter occurrences in the answer
+    const letterCount: Record<string, number> = {};
+    for (const ch of answer) {
+      letterCount[ch] = (letterCount[ch] || 0) + 1;
+    }
+
+    // Pass 1: correct matches
+    for (let i = 0; i < guess.length; i++) {
+      const g = guess[i];
+      if (g === answer[i]) {
+        result[i] = "correct";
+        letterCount[g] = (letterCount[g] || 0) - 1;
+      }
+    }
+
+    // Pass 2: present matches
+    for (let i = 0; i < guess.length; i++) {
+      const g = guess[i];
+      if (result[i] === "correct") continue;
+
+      if (letterCount[g] && letterCount[g] > 0) {
+        result[i] = "present";
+        letterCount[g] -= 1;
+      } else {
+        result[i] = "absent";
+      }
+    }
+
+    return result;
+  };
+
+  // --------------------------------------------------
+  // Merge keyboard statuses with priority:
+  // correct > present > absent. Never downgrade correct.
+  // --------------------------------------------------
+  const mergeKeyStatuses = (
+    prev: Record<string, LetterStatus | undefined>,
+    updates: Record<string, LetterStatus>
+  ): Record<string, LetterStatus | undefined> => {
+    const next: Record<string, LetterStatus | undefined> = { ...prev };
+
+    for (const [k, v] of Object.entries(updates)) {
+      const existing = next[k];
+
+      // Never downgrade an already "correct" key
+      if (existing === "correct") continue;
+
+      if (v === "correct") {
+        next[k] = "correct";
+      } else if (v === "present") {
+        if ((existing as LetterStatus) !== "correct") next[k] = "present";
+      } else if (v === "absent") {
+        if (!existing) next[k] = "absent";
+      }
+    }
+
+    return next;
+  };
+
+  // --------------------------------------------------
+  // Handle keyboard input
+  // --------------------------------------------------
   const handleKey = (key: string) => {
     if (key === "ENTER") {
       if (currentGuess.length === correctWord.length) {
@@ -27,21 +103,30 @@ const CrosswordModal: React.FC<CrosswordModalProps> = ({
         setCurrentGuess("");
         onSubmit?.(guessUpper, isCorrect);
 
-        // update key statuses
-        const newStatuses = { ...keyStatuses };
-        guessUpper.split("").forEach((letter, index) => {
-          if (correctWord[index] === letter) newStatuses[letter] = "correct";
-          else if (correctWord.includes(letter) && newStatuses[letter] !== "correct")
-            newStatuses[letter] = "present";
-          else if (!correctWord.includes(letter)) newStatuses[letter] = "absent";
-        });
-        setKeyStatuses(newStatuses);
+        // Compute statuses for the guess
+        const statuses = getStatuses(guessUpper, correctWord);
 
-        // Notify parent about remaining attempts
+        // Build per-letter updates for the keyboard
+        const perLetterUpdate: Record<string, LetterStatus> = {};
+        for (let i = 0; i < guessUpper.length; i++) {
+          const ch = guessUpper[i];
+          const st = statuses[i];
+          const prev = perLetterUpdate[ch];
+
+          if (prev === "correct") continue;
+          if (st === "correct") perLetterUpdate[ch] = "correct";
+          else if (st === "present" && (prev as LetterStatus) !== "correct")
+            perLetterUpdate[ch] = "present";
+          else if (st === "absent" && !prev) perLetterUpdate[ch] = "absent";
+        }
+
+        // Merge into global keyStatuses
+        setKeyStatuses((prev) => mergeKeyStatuses(prev, perLetterUpdate));
+
+        // Notify remaining attempts
         onRemainingAttempts?.(MAX_ATTEMPTS - newGuesses.length);
-
-        return;
       }
+      return;
     }
 
     if (key === "DEL") {
@@ -54,19 +139,15 @@ const CrosswordModal: React.FC<CrosswordModalProps> = ({
     }
   };
 
-  const getStatus = (letter: string, index: number) => {
-    const correctLetter = correctWord[index];
-    if (letter === correctLetter)
-      return styles["crossword-modal__cell--correct"];
-    if (correctWord.includes(letter))
-      return styles["crossword-modal__cell--present"];
-    return styles["crossword-modal__cell--absent"];
-  };
+  // Map status to SCSS class
+  const statusToClass = (status?: LetterStatus) =>
+    status ? styles[`crossword-modal__cell--${status}`] : "";
 
   const allKeys = "QWERTYUIOP ASDFGHJKL ZXCVBNM".split("");
   const isSolved = guesses.some((g) => g === correctWord);
   const isFailed = guesses.length >= MAX_ATTEMPTS && !isSolved;
 
+  // Keyboard listener
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (isSolved || isFailed) return;
@@ -79,9 +160,12 @@ const CrosswordModal: React.FC<CrosswordModalProps> = ({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentGuess, guesses, isSolved, isFailed]);
 
+  // --------------------------------------------------
+  // Render
+  // --------------------------------------------------
   return (
     <div className={styles["crossword-modal__overlay"]}>
       <div className={styles["crossword-modal"]}>
@@ -112,11 +196,14 @@ const CrosswordModal: React.FC<CrosswordModalProps> = ({
           Tebak kata ({word.word.length} huruf)
         </h2>
 
-        {/* Grid for guesses */}
+        {/* Guess grid */}
         <div className={styles["crossword-modal__grid"]}>
           {Array.from({ length: MAX_ATTEMPTS }).map((_, rowIndex) => {
             const guess = guesses[rowIndex] || "";
             const isCurrent = rowIndex === guesses.length;
+            const statuses =
+              !isCurrent && guess ? getStatuses(guess, correctWord) : [];
+
             return (
               <div key={rowIndex} className={styles["crossword-modal__row"]}>
                 {Array.from({ length: correctWord.length }).map((_, colIndex) => {
@@ -124,14 +211,15 @@ const CrosswordModal: React.FC<CrosswordModalProps> = ({
                     isCurrent && colIndex < currentGuess.length
                       ? currentGuess[colIndex]
                       : guess[colIndex] || "";
-
-                  const status =
-                    !isCurrent && guess ? getStatus(letter, colIndex) : "";
+                  const statusClass =
+                    !isCurrent && guess
+                      ? statusToClass(statuses[colIndex])
+                      : "";
 
                   return (
                     <div
                       key={colIndex}
-                      className={`${styles["crossword-modal__cell"]} ${status}`}
+                      className={`${styles["crossword-modal__cell"]} ${statusClass}`}
                     >
                       {letter}
                     </div>
