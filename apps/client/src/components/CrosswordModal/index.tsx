@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import type { CrosswordModalProps } from "~/contracts/props";
+import type { LetterStatus } from "~/contracts/types";
 import styles from "./CrosswordModal.module.scss";
-
-type LetterStatus = "correct" | "present" | "absent";
+import crosswordModalRPC from "~/rpc/CrosswordModalRPC";
 
 const MAX_ATTEMPTS = 6;
 
@@ -27,38 +27,7 @@ const CrosswordModal: React.FC<CrosswordModalProps> = ({
   // 2) Second pass -> mark present only if remaining count > 0.
   // --------------------------------------------------
   const getStatuses = (guess: string, answer: string): LetterStatus[] => {
-    const length = Math.max(guess.length, answer.length);
-    const result: LetterStatus[] = Array(length).fill("absent");
-
-    // Count letter occurrences in the answer
-    const letterCount: Record<string, number> = {};
-    for (const ch of answer) {
-      letterCount[ch] = (letterCount[ch] || 0) + 1;
-    }
-
-    // Pass 1: correct matches
-    for (let i = 0; i < guess.length; i++) {
-      const g = guess[i];
-      if (g === answer[i]) {
-        result[i] = "correct";
-        letterCount[g] = (letterCount[g] || 0) - 1;
-      }
-    }
-
-    // Pass 2: present matches
-    for (let i = 0; i < guess.length; i++) {
-      const g = guess[i];
-      if (result[i] === "correct") continue;
-
-      if (letterCount[g] && letterCount[g] > 0) {
-        result[i] = "present";
-        letterCount[g] -= 1;
-      } else {
-        result[i] = "absent";
-      }
-    }
-
-    return result;
+    return crosswordModalRPC.getStatuses(guess, answer) as unknown as LetterStatus[];
   };
 
   // --------------------------------------------------
@@ -69,24 +38,7 @@ const CrosswordModal: React.FC<CrosswordModalProps> = ({
     prev: Record<string, LetterStatus | undefined>,
     updates: Record<string, LetterStatus>
   ): Record<string, LetterStatus | undefined> => {
-    const next: Record<string, LetterStatus | undefined> = { ...prev };
-
-    for (const [k, v] of Object.entries(updates)) {
-      const existing = next[k];
-
-      // Never downgrade an already "correct" key
-      if (existing === "correct") continue;
-
-      if (v === "correct") {
-        next[k] = "correct";
-      } else if (v === "present") {
-        if ((existing as LetterStatus) !== "correct") next[k] = "present";
-      } else if (v === "absent") {
-        if (!existing) next[k] = "absent";
-      }
-    }
-
-    return next;
+    return crosswordModalRPC.mergeKeyStatuses(prev, updates) as unknown as Record<string, LetterStatus | undefined>;
   };
 
   // --------------------------------------------------

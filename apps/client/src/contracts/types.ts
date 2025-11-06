@@ -21,3 +21,5 @@ export interface KbbiEntry {
   d: string;       // HTML description
   msg?: string;    // optional message field
 }
+
+export type LetterStatus = "correct" | "present" | "absent";

@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import type { Answer } from "../../contracts/types";
 import type { CrosswordGridProps } from "../../contracts/props";
 import CrosswordModal from "../CrosswordModal";
+import crosswordModalRPC from "~/rpc/CrosswordModalRPC";
+import evaluateGuessFromServer from "~/rpc/evaluateGuessFromServer";
+import mergeKeyStatusesFromServer from "~/rpc/mergeKeyStatusesFromServer";
 import styles from "./CrosswordGrid.module.scss";
 
 const MAX_ATTEMPTS_PER_WORD = 6; // Matches modal
@@ -44,7 +47,7 @@ const CrosswordGrid: React.FC<CrosswordGridProps> = ({ data, onComplete }) => {
   };
 
   // Handle click on a grid cell
-  const handleCellClick = (row: number, col: number) => {
+  const handleCellClick = async (row: number, col: number) => {
     if (lockedCells[row][col]) return;
 
     const found = data.answers.find((a) => {
@@ -61,6 +64,9 @@ const CrosswordGrid: React.FC<CrosswordGridProps> = ({ data, onComplete }) => {
 
     // Only block if word is solved or attempts exhausted
     if (isWordSolved(found) || remainingAttemptsMap[key] === 0) return;
+
+    crosswordModalRPC.syncEvaluateGuess(await evaluateGuessFromServer() as never);
+    crosswordModalRPC.syncMergeKeyStatuses(await mergeKeyStatusesFromServer() as never);
 
     setSelectedWord(found);
   };

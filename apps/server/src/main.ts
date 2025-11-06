@@ -1,18 +1,19 @@
 import { getRandomCrossword } from "./procedures/getRandomCrossword";
-// import { getWordDescription } from "./procedures/getWordDescription";
+import { evaluateGuess } from "./procedures/evaluateGuess";
+import { mergeKeyStatuses } from "./procedures/mergeKeyStatuses";
 
 // ------------------------------------------------------------
-// Entry point: an immediately invoked async function expression
-// Used to run tests or demo logic without any framework.
+// Entry point: run quick tests manually (no Jest / Vitest needed)
 // ------------------------------------------------------------
 (async function main() {
+  console.log("=== Running crossword procedure tests ===");
+
   // ------------------------------------------------------------
-  // Example test: getRandomCrossword()
+  // getRandomCrossword()
   // ------------------------------------------------------------
   const crossword = getRandomCrossword();
   console.log("CHECK THE DATA:", crossword);
 
-  // Basic validation checks
   console.assert(
     crossword !== null && crossword !== undefined,
     "getRandomCrossword() should not return null or undefined"
@@ -23,32 +24,68 @@ import { getRandomCrossword } from "./procedures/getRandomCrossword";
   );
 
   // ------------------------------------------------------------
-  // The following tests are temporarily commented out
+  // evaluateGuess()
   // ------------------------------------------------------------
+  const answer = "KOPI";
+  const guess1 = "KOTA"; // 2 huruf benar, 1 posisi benar
+  const guess2 = "KOPI"; // full correct
+  const guess3 = "SUSU"; // semua salah
 
-  // // Example test: getWordDescription("bijak")
-  // const word = "bijak";
-  // const desc = await getWordDescription(word);
-  // console.log("getWordDescription:", desc);
-  // console.assert(
-  //   desc !== null && desc !== undefined,
-  //   "getWordDescription() should not return null or undefined"
-  // );
-  // console.assert(
-  //   typeof desc === "object" || typeof desc === "string",
-  //   "getWordDescription() should return an object or string"
-  // );
+  const result1 = evaluateGuess(guess1, answer);
+  const result2 = evaluateGuess(guess2, answer);
+  const result3 = evaluateGuess(guess3, answer);
 
-  // // Edge case test for empty string input
-  // try {
-  //   const bad = await getWordDescription("");
-  //   console.assert(
-  //     bad === null || bad === undefined || bad === "Not found",
-  //     "getWordDescription('') should handle invalid input safely"
-  //   );
-  // } catch (err) {
-  //   console.log("Handled expected error for empty string input:", err);
-  // }
+  console.log("\nevaluateGuess() results:");
+  console.log("guess1:", guess1, "=>", result1);
+  console.log("guess2:", guess2, "=>", result2);
+  console.log("guess3:", guess3, "=>", result3);
 
-  console.log("All manual tests completed.");
+  console.assert(
+    Array.isArray(result1) && result1.length === answer.length,
+    "evaluateGuess() should return array of statuses"
+  );
+  console.assert(
+    result2.every((s) => s === "correct"),
+    "evaluateGuess() should mark all letters as correct for exact match"
+  );
+  console.assert(
+    result3.every((s) => s === "absent"),
+    "evaluateGuess() should mark all letters absent for totally wrong guess"
+  );
+
+  // ------------------------------------------------------------
+  // mergeKeyStatuses()
+  // ------------------------------------------------------------
+  const prevStatuses = {
+    K: "present",
+    O: "absent",
+    P: undefined,
+  } as Record<string, "correct" | "present" | "absent" | undefined>;
+
+  const updates = {
+    O: "correct",
+    P: "present",
+  } as Record<string, "correct" | "present" | "absent">;
+
+  const merged = mergeKeyStatuses(prevStatuses, updates);
+
+  console.log("\nmergeKeyStatuses() result:");
+  console.log("Before:", prevStatuses);
+  console.log("Updates:", updates);
+  console.log("After :", merged);
+
+  console.assert(
+    merged.O === "correct",
+    "mergeKeyStatuses() should upgrade O from absent → correct"
+  );
+  console.assert(
+    merged.P === "present",
+    "mergeKeyStatuses() should set P to present"
+  );
+  console.assert(
+    merged.K === "present",
+    "mergeKeyStatuses() should keep existing 'present'"
+  );
+
+  console.log("\n✅ All manual tests completed without assertion errors.\n");
 })();

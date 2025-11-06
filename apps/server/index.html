@@ -5,9 +5,98 @@
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TTSL4</title>
+
+    <!-- ============================================================
+         Inline styling for a centered, minimal notice message
+         This block ensures that when the server page is opened directly
+         in a browser, the user immediately sees instructions to open
+         the console (F12 → Console tab) to view the test results.
+         ============================================================ -->
+    <style>
+      /* Reset and layout setup */
+      body {
+        margin: 0;
+        padding: 0 1.25rem;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #0d1117; /* Dark background similar to GitHub dark theme */
+        color: #e6edf3; /* Light gray text for contrast */
+        font-family: system-ui, sans-serif;
+        text-align: center;
+      }
+
+      /* Notice container box */
+      .notice {
+        max-width: 480px;
+        background: #161b22; /* Slightly lighter than background */
+        border: 2px solid #30363d; /* Subtle border for definition */
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.8s ease forwards;
+      }
+
+      /* Headline style */
+      .notice h1 {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+      }
+
+      /* Paragraph text style */
+      .notice p {
+        font-size: 1rem;
+        color: #8b949e;
+      }
+
+      /* Highlighted inline code appearance */
+      .notice code {
+        color: #58a6ff;
+        font-weight: bold;
+      }
+
+      /* Simple fade-in animation for a smoother appearance */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
   </head>
+
   <body>
+    <!-- ============================================================
+         Central notice displayed when the server page is opened.
+         It tells the user where to look for test output (the console).
+         This message is primarily useful when testing server scripts,
+         such as `server/test.ts`, which output results via console.log.
+         ============================================================ -->
+    <div class="notice">
+      <h1>Crossword RPC Test</h1>
+      <p>
+        Open <code>Console (F12 → Console tab)</code> to view the test output
+        from the server.
+      </p>
+    </div>
+
+    <!-- ============================================================
+         App container for mounting client-side logic.
+         Even though this page serves a static test notice, the main
+         client application is still initialized below.
+         ============================================================ -->
     <div id="app"></div>
+
+    <!-- ============================================================
+         Entry point for client-side logic.
+         This file (src/main.ts) may contain logic for initializing
+         the main UI or test routines when running the client version.
+         ============================================================ -->
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
