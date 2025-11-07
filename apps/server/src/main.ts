@@ -1,6 +1,7 @@
 import { getRandomCrossword } from "./procedures/getRandomCrossword";
 import { evaluateGuess } from "./procedures/evaluateGuess";
 import { mergeKeyStatuses } from "./procedures/mergeKeyStatuses";
+import { checkWordInKBBI } from "./procedures/checkWordInKBBI";
 
 // ------------------------------------------------------------
 // Entry point: run quick tests manually (no Jest / Vitest needed)
@@ -86,6 +87,27 @@ import { mergeKeyStatuses } from "./procedures/mergeKeyStatuses";
     merged.K === "present",
     "mergeKeyStatuses() should keep existing 'present'"
   );
+
+  // ------------------------------------------------------------
+  // checkWordInKBBI()
+  // ------------------------------------------------------------
+  console.log("\ncheckWordInKBBI() tests:");
+
+  const kbbiTests = [
+    { word: "abadi", expected: true },
+    { word: "abang", expected: true },
+    { word: "tidakada", expected: false },
+    { word: "randomword", expected: false },
+  ];
+
+  for (const { word, expected } of kbbiTests) {
+    const exists = checkWordInKBBI(word);
+    console.log(`"${word}" → ${exists ? "FOUND" : "NOT FOUND"}`);
+    console.assert(
+      exists === expected,
+      `checkWordInKBBI("${word}") expected ${expected} but got ${exists}`
+    );
+  }
 
   console.log("\n✅ All manual tests completed without assertion errors.\n");
 })();

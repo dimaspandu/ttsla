@@ -12,7 +12,7 @@ const instructions = [
       "Tebak kata dengan clue yang berubah setiap harinya. Ambil inspirasi dari budaya lokal.",
   },
   {
-    title: "TEKLU",
+    title: "TEKLI",
     description:
       "Gunakan logika dan intuisi. Huruf yang benar akan diberi warna hijau, huruf yang tepat namun salah posisi akan berwarna kuning.",
   },

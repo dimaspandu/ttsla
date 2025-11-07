@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import type { CrosswordModalProps } from "~/contracts/props";
 import type { LetterStatus } from "~/contracts/types";
 import crosswordModalRPC from "~/rpc/CrosswordModalRPC";
+import checkWordInKBBIFromServer from "~/rpc/checkWordInKBBIFromServer";
 import styles from "./CrosswordModal.module.scss";
+import { useSnackbar } from "~/hooks/useSnackbar";
 
 const MAX_ATTEMPTS = 6;
 
@@ -19,6 +21,8 @@ const CrosswordModal: React.FC<CrosswordModalProps> = ({
   >({});
 
   const correctWord = word.word.toUpperCase();
+
+  const { showSnackbar, SnackbarContainer } = useSnackbar();
 
   // --------------------------------------------------
   // Determine statuses for a guess vs the correct word.
@@ -44,10 +48,30 @@ const CrosswordModal: React.FC<CrosswordModalProps> = ({
   // --------------------------------------------------
   // Handle keyboard input
   // --------------------------------------------------
-  const handleKey = (key: string) => {
+  const handleKey = async (key: string) => {
     if (key === "ENTER") {
       if (currentGuess.length === correctWord.length) {
         const guessUpper = currentGuess.toUpperCase();
+
+        // ---------------------------------------------
+        // Validate the guessed word against KBBI first
+        // ---------------------------------------------
+        try {
+          const exists = await checkWordInKBBIFromServer(guessUpper);
+
+          if (!exists) {
+            // Word not found in KBBI → reject and show error
+            showSnackbar(`Kata "${guessUpper}" tidak ditemukan di KBBI.`, "error");
+            return;
+          }
+        } catch (err) {
+          console.error("[CrosswordModal] Failed to check KBBI:", err);
+          // Optional fallback: still allow submission if KBBI check fails
+          showSnackbar("Gagal memeriksa KBBI. Coba lagi nanti.", "error");
+          return;
+        }
+
+        // Continue with standard logic if word is valid
         const isCorrect = guessUpper === correctWord;
 
         const newGuesses = [...guesses, guessUpper];
@@ -147,6 +171,8 @@ const CrosswordModal: React.FC<CrosswordModalProps> = ({
         <h2 className={styles["crossword-modal__title"]}>
           Tebak kata ({word.word.length} huruf)
         </h2>
+
+        {SnackbarContainer}
 
         {/* Guess grid */}
         <div className={styles["crossword-modal__grid"]}>

@@ -142,7 +142,7 @@ export default function MainScene() {
   // -----------------------------------------
   return (
     <div className={styles["main-scene"]}>
-      <h1 className={styles["main-scene__title"]}>Tekla. Teklu. Katla.</h1>
+      <h1 className={styles["main-scene__title"]}>Tekla. Tekli. Katla.</h1>
       <p className={styles["main-scene__subtitle"]}>
         Gim kata harian berbahasa Indonesia yang menggabungkan logika dan rasa.
         Masuk setiap hari, selesaikan teka-teki, dan lihat apakah kamu bisa menebak

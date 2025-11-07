@@ -4,8 +4,11 @@ import mergeKeyStatuses from "./mergeKeyStatuses";
 
 /**
  * RPC bridge for crossword modal logic.
- * This class allows client-side fallback logic when the server-provided
- * implementations are not yet synchronized.
+ *
+ * This class serves as a dynamic bridge to functions that are typically
+ * provided by the development server (RPC-style). It supports both:
+ * - client-side fallback implementations (for offline dev use), and
+ * - server-synced functions (for shared logic consistency).
  */
 class CrosswordModalRPC {
   private _evaluateGuess: ((guess: string, answer: string) => LetterStatus[]) | null = null;
@@ -16,6 +19,10 @@ class CrosswordModalRPC {
       ) => Record<string, LetterStatus | undefined>)
     | null = null;
 
+  // -------------------------------------------------------------
+  // Evaluate Guess (server-synced with local fallback)
+  // -------------------------------------------------------------
+
   /**
    * Sync the "evaluateGuess" function from the server.
    */
@@ -24,13 +31,17 @@ class CrosswordModalRPC {
   }
 
   /**
-   * Evaluate guess vs answer using the server-synced function if available,
-   * otherwise fall back to the local implementation.
+   * Evaluate a guess against the answer.
+   * Falls back to the local implementation if not synced.
    */
   getStatuses(guess: string, answer: string): LetterStatus[] {
     const evaluator = this._evaluateGuess ?? evaluateGuess;
     return evaluator(guess, answer);
   }
+
+  // -------------------------------------------------------------
+  // Merge Key Statuses (server-synced with local fallback)
+  // -------------------------------------------------------------
 
   /**
    * Sync the "mergeKeyStatuses" function from the server.
@@ -45,8 +56,8 @@ class CrosswordModalRPC {
   }
 
   /**
-   * Merge key status maps using the server-synced function if available,
-   * otherwise fall back to the local implementation.
+   * Merge key status maps.
+   * Falls back to the local implementation if not synced.
    */
   mergeKeyStatuses(
     prev: Record<string, LetterStatus | undefined>,
@@ -57,5 +68,8 @@ class CrosswordModalRPC {
   }
 }
 
+// -------------------------------------------------------------
+// Export a singleton instance
+// -------------------------------------------------------------
 export const crosswordModalRPC = new CrosswordModalRPC();
 export default crosswordModalRPC;

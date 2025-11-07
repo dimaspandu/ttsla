@@ -1,4 +1,4 @@
-import words from "../data/words.json";
+import words from "../data/words.json" assert { type: "json" };
 
 type Direction = "across" | "down";
 
