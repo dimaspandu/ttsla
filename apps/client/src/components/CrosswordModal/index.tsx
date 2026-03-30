@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import type { CrosswordModalProps } from "~/contracts/props";
 import type { LetterStatus } from "~/contracts/types";
+import { useSnackbar } from "~/hooks/useSnackbar";
 import crosswordModalRPC from "~/rpc/CrosswordModalRPC";
 import checkWordInKBBIFromServer from "~/rpc/checkWordInKBBIFromServer";
 import styles from "./CrosswordModal.module.scss";
-import { useSnackbar } from "~/hooks/useSnackbar";
 
 const MAX_ATTEMPTS = 6;
 
